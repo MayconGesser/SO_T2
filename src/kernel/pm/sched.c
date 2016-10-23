@@ -95,13 +95,33 @@ PUBLIC void yield(void)
 			continue;
 		
 		/*
+		 * On boot all created proccesses
+		 * have PRIO_USER priority, which
+		 * makes it impossible to boot.
+		 */
+		if (p->priority == PRIO_USER) {
+			p->priority = PRIO_SIG;
+		}
+
+		/* 
+		 * Implements aging proccess
+		 * through increasing the priority
+		 * of current proccess with counter 
+		 * higher than 10. 
+		 */
+		if (p->counter > 10) {
+			p->priority -= 20;
+			p->counter = 0;
+		}
+
+		/*
 		 * Process with higher
 		 * waiting time found.
 		 */
-		if (p->counter > next->counter)
+		if (p->priority < next->priority)
 		{
-			next->counter++;
 			next = p;
+			next->counter++;
 		}
 			
 		/*
@@ -113,7 +133,7 @@ PUBLIC void yield(void)
 	}
 	
 	/* Switch to next process. */
-	next->priority = PRIO_USER;
+	//next->priority = PRIO_USER;
 	next->state = PROC_RUNNING;
 	next->counter = PROC_QUANTUM;
 	switch_to(next);
