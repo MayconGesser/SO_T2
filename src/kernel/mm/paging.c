@@ -293,18 +293,28 @@ PRIVATE struct
 PRIVATE int allocf(void)
 {
 	int i;      /* Loop index.  */
-	int oldest; /* Oldest page. */
-	
+	/*int oldest;  Oldest page. */
+	struct pte *pg;
+
 	#define OLDEST(x, y) (frames[x].age < frames[y].age)
 	
-	/* Search for a free frame. */
+	/* Search for a free frame. 
 	oldest = -1;
+	*/
+	/*for (i = 0; i < NR_FRAMES; i++) {
+
+		if (frames[i].count == 1)
+			frames[i].count = 0; 
+
+	}*/
+
 	for (i = 0; i < NR_FRAMES; i++)
 	{
 		/* Found it. */
 		if (frames[i].count == 0)
 			goto found;
 		
+
 		/* Local page replacement policy. */
 		if (frames[i].owner == curr_proc->pid)
 		{
@@ -312,18 +322,27 @@ PRIVATE int allocf(void)
 			if (frames[i].count > 1)
 				continue;
 			
-			/* Oldest page found. */
+			pg = getpte(curr_proc, frames[i].addr);
+
+			if (pg->dirty == 1)
+				pg->dirty = 0;
+			else
+				break;
+
+			/* Oldest page found. 
 			if ((oldest < 0) || (OLDEST(i, oldest)))
 				oldest = i;
+			*/
 		}
 	}
 	
-	/* No frame left. */
+	/* No frame left.
 	if (oldest < 0)
 		return (-1);
-	
+	 */
+
 	/* Swap page out. */
-	if (swap_out(curr_proc, frames[i = oldest].addr))
+	if (swap_out(curr_proc, frames[i].addr))
 		return (-1);
 	
 found:		
